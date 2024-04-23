@@ -6,50 +6,26 @@
     @dragenter.prevent
   >
     <div class="filter">
-      <v-tooltip text="Сортировка по возрастанию">
+      <v-tooltip
+        v-for="({ title, sortingDirection, iconType }, index) in CardListSortOptions"
+        :key="index"
+        :text="title"
+      >
         <template v-slot:activator="{ props }">
           <v-btn
             v-bind="props"
-            icon="mdi-sort-ascending"
+            :icon="iconType"
             density="compact"
             variant="tonal"
             class="sort-btn"
             color="blue"
             :disabled="!cards.length"
-            @click="sortList('asc')"
-          />
-        </template>
-      </v-tooltip>
-      <v-tooltip text="Сортировка по убыванию">
-        <template v-slot:activator="{ props }">
-          <v-btn
-            v-bind="props"
-            icon="mdi-sort-descending"
-            density="compact"
-            variant="tonal"
-            class="sort-btn"
-            color="blue"
-            :disabled="!cards.length"
-            @click="sortList('desc')"
-          />
-        </template>
-      </v-tooltip>
-
-      <v-tooltip text="отключить сортировку">
-        <template v-slot:activator="{ props }">
-          <v-btn
-            v-bind="props"
-            icon="mdi-sort-variant-remove"
-            density="compact"
-            variant="tonal"
-            class="sort-btn"
-            color="blue"
-            @click="sortList('nosort')"
-            :disabled="!cards.length"
+            @click="sortList(sortingDirection)"
           />
         </template>
       </v-tooltip>
     </div>
+
     <div class="title">
       <h2>
         {{ options.title }}
@@ -112,6 +88,27 @@ const form = ref({
 })
 
 let cards = ref([])
+
+const CardListSortOptions = ref([
+  {
+    sortingDirection: "descending",
+    title: "Сортировка по возрастанию",
+    iconType: "mdi-sort-descending",
+    id: 1,
+  },
+  {
+    sortingDirection: "ascending",
+    title: "Сортировка по убыванию",
+    iconType: "mdi-sort-ascending",
+    id: 2,
+  },
+  {
+    sortingDirection: "default",
+    title: "Сортировка по id",
+    iconType: "mdi-sort-variant-remove",
+    id: 3,
+  },
+])
 
 function getLocalCards() {
   switch (props.options.id) {
@@ -178,20 +175,20 @@ function onDrop(event, optionsId) {
       break
   }
 }
-
 function sortList(type) {
   getLocalCards()
-  if (type === "asc") {
-    console.log(type)
-    cards = cards.value.sort((a, b) => b.rating.rate - a.rating.rate)
+  let callback
+
+  if (type === "ascending") {
+    callback = (a, b) => b.rating.rate - a.rating.rate
   }
-  if (type === "desc") {
-    cards = cards.value.sort((a, b) => a.rating.rate - b.rating.rate)
+  if (type === "descending") {
+    callback = (a, b) => a.rating.rate - b.rating.rate
   }
-  if (type === "nosort") {
-    cards = cards.value.sort((a, b) => a.id - b.id)
+  if (type === "default") {
+    callback = (a, b) => a.id - b.id
   }
-  console.log(cards)
+  cards = cards.value.sort(callback)
 }
 </script>
 
